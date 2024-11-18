@@ -1,66 +1,132 @@
-<!-- ADD INVENTORY OF FDG-SIS -->
-
-<!-- EXTENDS CCS/ JS LINKS -->
 {% extends 'Base_Template.html' %}
 
-<!-- MAIN CONTENT OF ADMIN -->
 {% block content %}
-
-<!-- INCLUDES SIDEBAR MENU -->
 {% include 'Sidebar.html' %}
 <script src="./dist/js/demo-theme.min.js?1692870487"></script>
 <div class="page">
-
   <div class="page-wrapper">
-
-    <!-- INCLUDES HEADER -->
     <div class="page-header d-print-none">
       <div class="container-xl">
         <div class="row g-2 align-items-center">
           <div class="col">
-            <h2 class="page-title">
-              Add Stock
-            </h2>
+            <h2 class="page-title">Add Facility Stock</h2>
           </div>
         </div>
       </div>
     </div>
- 
-        <!-- PAGE BODY -->
-            <div class="page-body">
-          <div class="container-xl">
-            <div class="row row-cards">
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title">New Stock</h3>
+
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">New Stock</h3>
+              </div>
+              <div class="card-body">
+                <form method="post">
+                  {% csrf_token %}
+                  
+                  <div class="mb-3">
+                    <label for="{{ facility_form.facility.id_for_label }}">Select Facility</label>
+                    {{ facility_form.facility }}
                   </div>
-                  <div class="card-body">
-                    <div class="mb-3">
-                      <label class="form-label required">Stock Name</label>
-                      <div>
-                        <input type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter stock name">
-                      </div>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label required">Amount</label>
-                      <div>
-                        <input type="number" class="form-control" placeholder="Enter amount">
-                      </div>
-                    </div>
+
+                  <div class="mb-3">
+                    <label for="{{ facility_form.room_number.id_for_label }}">Room Number</label>
+                    {{ facility_form.room_number }}
                   </div>
+
+                  <!-- Item Formset -->
+                  <div id="item-formset">
+                    {{ item_formset.management_form }}
+                    {% for form in item_formset %}
+                      <div class="row item-entry">
+                        <div class="col-lg-3">
+                          <div class="mb-3">
+                            <label for="{{ form.item_name.id_for_label }}">Enter Item</label>
+                            {{ form.item_name }}
+                          </div>
+                        </div>
+                        <div class="col-lg-3">
+                          <div class="mb-3">
+                            <label for="{{ form.quantity.id_for_label }}">Quantity</label>
+                            {{ form.quantity }}
+                          </div>
+                        </div>
+                        <div class="col-lg-3">
+                          <div class="mb-3">
+                            <label for="{{ form.price.id_for_label }}">Price</label>
+                            {{ form.price }}
+                          </div>
+                        </div>
+                        <div class="col-lg-3 d-flex align-items-center">
+                          <button type="button" class="btn btn-danger remove-item">Remove</button>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+
+                  <div class="mb-3">
+                    <button type="button" id="add-more" class="btn btn-primary">Add More</button>
+                  </div>
+                  
+                  <!-- Hidden Date Added Field -->
+                  <input type="hidden" id="date-added" name="date_added" value="">
+
                   <div class="card-footer text-end">
-                    <a href="Depart_Inv.html" class="btn btn-success">Add Supplier</a>
-                    <a href="reset_url" class="btn btn-danger">Reset</a>
-                    <a href="Admin_Home.html" class="btn btn-secondary">Cancel</a>
-                </div>  
+                    <button type="submit" class="btn btn-success" onclick="setDateAdded()">Add to Inventory</button>
+                    <a href="" class="btn btn-secondary">Cancel</a>
+                  </div>
                 </form>
               </div>
             </div>
           </div>
         </div>
-      </body>
-      </html>
-        
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Function to add a new item row
+  document.getElementById('add-more').addEventListener('click', function(event) {
+      event.preventDefault();  // Prevent form submission on button click
+
+      const itemFormset = document.getElementById('item-formset');
+      const totalForms = document.querySelector('[name="form-TOTAL_FORMS"]');
+      const newRow = document.querySelector('.item-entry').cloneNode(true);
+
+      // Update the name attributes for the cloned row to be unique
+      newRow.querySelectorAll('input').forEach(input => {
+          input.value = '';  // Clear the cloned input value
+          const name = input.name.replace(`-${totalForms - 1}-`, `-${totalForms}-`);
+          input.setAttribute('name', name);
+          input.id = name;
+      });
+
+      // Attach the remove button functionality
+      newRow.querySelector('.remove-item').addEventListener('click', function() {
+          newRow.remove();
+      });
+
+      itemFormset.appendChild(newRow);
+      document.querySelector('[name="form-TOTAL_FORMS"]').value = totalForms + 1;
+  });
+
+  // Attach remove functionality to initial rows
+  document.querySelectorAll('.remove-item').forEach(button => {
+      button.addEventListener('click', function() {
+          button.closest('.item-entry').remove();
+      });
+  });
+
+  // Function to set the current date in the hidden "Date Added" field
+  function setDateAdded() {
+      const dateAddedField = document.getElementById('date-added');
+      const currentDate = new Date();
+      dateAddedField.value = currentDate.toISOString().split('T')[0];  // Format date as YYYY-MM-DD
+  }
+</script>
 
 {% endblock content %}

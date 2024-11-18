@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'widget_tweaks',
     'StudInfoSys'
 ]
 
@@ -76,7 +77,14 @@ WSGI_APPLICATION = 'FlordeGrace.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.parse(config("DATABASE_URL"))
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'FDGInventory',  # Use the name of your PostgreSQL database
+        'USER': 'admin123',   # PostgreSQL username
+        'PASSWORD': 'admin',  # PostgreSQL password
+        'HOST': 'localhost',  # Or '127.0.0.1'
+        'PORT': '5432',       # Default PostgreSQL port
+    }
 }
 
 

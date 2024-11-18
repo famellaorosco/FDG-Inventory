@@ -2,6 +2,7 @@
 
 <!-- EXTENDS CCS/ JS LINKS -->
 {% extends 'Base_Template.html' %}
+<!-- {% load widget_tweaks %} -->
 
 <!-- MAIN CONTENT OF ADMIN -->
 {% block content %}
@@ -10,7 +11,6 @@
 {% include 'Sidebar.html' %}
 <script src="./dist/js/demo-theme.min.js?1692870487"></script>
 <div class="page">
-
   <div class="page-wrapper">
 
     <!-- INCLUDES HEADER -->
@@ -18,9 +18,7 @@
       <div class="container-xl">
         <div class="row g-2 align-items-center">
           <div class="col">
-            <h2 class="page-title">
-              Department Inventory
-            </h2>
+            <h2 class="page-title"> Facility Inventory </h2>
           </div>
         </div>
       </div>
@@ -75,135 +73,171 @@
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="input-icon me-3 flex-grow-1">
-                  <input type="text" value="" class="form-control" placeholder="Search…">
-                  <span class="input-icon-addon">
-                    <!-- Search icon -->
+                  <form method="get">
+                    <div class="input-group search">
+                      <input type="text" value="" class="form-control" placeholder="Search…">
+                        <div class="input-group-append">
+                           <button type="submit" class="btn btn-primary"> Search </button>
+                        </div>
+                    </div>
+                  </form>
+                    <!-- Search icon
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="#0000FF" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
                       <path d="M21 21l-6 -6" />
-                    </svg>
-                  </span>
+                    </svg> -->
                 </div>
               
                 <div class="btn-group" role="group">
                   <input type="radio" class="btn-check" name="btn-radio-basic" id="btn-radio-basic-1" autocomplete="off" checked>
-                  <label for="btn-radio-basic-1" type="button" class="btn mx-2">All Items</label>
-                  
-                  <input type="radio" class="btn-check" name="btn-radio-basic" id="btn-radio-basic-2" autocomplete="off">
-                  <a href="./Add_Inv.html" id="btn-radio-basic-2-link" class="btn btn-primary mx-2">Add New Item</a>
+                  <a href="{% url 'add_inventory' %}" id="btn-radio-basic-2-link" class="btn btn-primary mx-2">Add Facility Stock</a>
                 </div>
               </div>
                   
                   <div class="d-flex align-items-center justify-content-center mb-3">
                     <div class="w-100 mx-auto"> <!-- Set width to 75% to make it longer -->
                       <div class="form-selectgroup d-flex justify-content-center"> <!-- Center the buttons -->
-                        <label class="form-selectgroup-item me-3" style="min-width: 150px;"> <!-- Adjust min-width -->
-                          <input type="checkbox" name="name" value="Filter" class="form-selectgroup-input" checked>
-                          <span class="form-selectgroup-label">Filter</span>
-                        </label>
-                        <label class="form-selectgroup-item me-3" style="min-width: 150px;">
-                          <input type="checkbox" name="name" value="Classroom" class="form-selectgroup-input">
-                          <span class="form-selectgroup-label">Classroom</span>
-                        </label>
-                        <label class="form-selectgroup-item me-3" style="min-width: 150px;">
-                          <input type="checkbox" name="name" value="Office" class="form-selectgroup-input">
-                          <span class="form-selectgroup-label">Office</span>
-                        </label>
-                        <label class="form-selectgroup-item me-3" style="min-width: 150px;">
-                          <input type="checkbox" name="name" value="Library" class="form-selectgroup-input">
-                          <span class="form-selectgroup-label">Library</span>
-                        </label>
-                        <label class="form-selectgroup-item" style="min-width: 150px;">
-                          <input type="checkbox" name="name" value="Clinic" class="form-selectgroup-input">
-                          <span class="form-selectgroup-label">Clinic</span>
-                        </label>
+
+                        <!-- FILTER ROW -->
+                        <form method="get" id="filter-form">
+                          <div class="filter-row">
+                              <select name="facility" onchange="document.getElementById('filter-form').submit();">
+                                  <option value="">Facility Name</option>
+                                  <!-- Populate facilities dynamically -->
+                                  {% for facility in facilities %}
+                                      <option value="{{ facility.facility }}" {% if facility.facility == facility_filter %}selected{% endif %}>{{ facility.facility }}</option>
+                                  {% endfor %}
+                              </select>
+                      
+                              <!-- Other filters like Assignee, Attachments can be added similarly -->
+                      
+                              <input type="date" name="date_created" value="{{ date_created_filter }}" onchange="document.getElementById('filter-form').submit();">
+                          </div>
+                      </form>
+
+
+                       <!--  <a href="?category=All" class="form-selectgroup-item btn {% if category_filter.form.category.value == 'All' %}{% else %}{% endif %}" style="min-width: 150px;">
+                          <span class="form-selectgroup-label">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-filter">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
+                            </svg>
+                            Filters</span>
+                        </a> -->
+                        
                       </div>
                     </div>
                   </div>
                   
-                  
 
                 <!-- Table Card -->
-                <div class="card">
-                  <div class="table-responsive">
-                    <table class="table card-table table-vcenter text-nowrap datatable">
-                      <thead>
-                        <tr>
-                          <th>SNo</th>
-                          <th>Item Name</th>
-                          <th>Description</th>
-                          <th>Quantity</th>
-                          <th>Available</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>1</td>
-                          <td class>Chair</td>
-                          <td class>Lorem Ipsum</td>
-                          <td class>70</td>
-                          <td class>60</td>
-                        </tr>
-                        <tr>
-                          <td>2</td>
-                          <td class>Blackboard</td>
-                          <td class>Lorem Ipsum</td>
-                          <td class>5</td>
-                          <td class>5</td>
-                        </tr>
-                        <tr>
-                          <td>3</td>
-                          <td class>Whiteboard</td>
-                          <td class>Lorem Ipsum</td>
-                          <td class>5</td>
-                          <td class>5</td>
-                        </tr>
-                        <tr>
-                          <td>4</td>
-                          <td class>Bookshelf</td>
-                          <td class>Lorem Ipsum</td>
-                          <td class>5</td>
-                          <td class>5</td>
-                        </tr>
-                        <tr>
-                          <td>5</td>
-                          <td class>Television</td>
-                          <td class>Lorem Ipsum</td>
-                          <td class>5</td>
-                          <td class>5</td>
-                        </tr>
-                        <tr>
-                          <td>6</td>
-                          <td class>Tables</td>
-                          <td class>Lorem Ipsum</td>
-                          <td class>40</td>
-                          <td class>35</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                <!-- Table Card -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter text-nowrap datatable">
+      <thead>
+        <tr>
+          <th>FNo</th>
+          <th>Facility Name</th>
+          <th>Room Number</th>
+          <th>Date Added</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if page_obj %}
+        {% for inventory in page_obj %}
+        <tr>
+          <td>{{ inventory.id }}</td>
+          <td>{{ inventory.facility }}</td>
+          <td>{{ inventory.room_number }}</td>
+          <td>{{ inventory.date }}</td>
+          <td>
+            <button class="btn" data-bs-toggle="collapse" data-bs-target="#collapse{{ inventory.id }}" aria-expanded="false">
+              View
+            </button>
+          </td>
+        </tr>
+        <!-- Collapsible Row for Stock Items -->
+        <tr>
+          <td colspan="5" class="p-0">
+            <div id="collapse{{ inventory.id }}" class="collapse">
+              <div class="p-3">
+                <!-- Stock Item List -->
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Item Name</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in inventory.items.all %}
+                    <tr>
+                      <td>{{ item.item_name }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.price }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <div class="d-flex justify-content-end">
+                  <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="collapse" aria-label="Close">Close</button>
+                  <a href="{% url 'update_facility_stock' facility_id=inventory.id %}" class="btn btn-primary">Proceed to inventory</a>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center">No items found.</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
                   <div class="card-footer d-flex align-items-center">
-                    <p class="m-0 text-secondary">Showing <span>1</span> to <span>6</span> of <span>16</span> entries</p>
+                    <p class="m-0 text-secondary">Showing 
+                      <span>{{ page_obj.start_index }}</span> to 
+                      <span>{{ page_obj.end_index }}</span> of 
+                      <span>{{ page_obj.paginator.count }}</span> entries
+                    </p>
                     <ul class="pagination m-0 ms-auto">
-                      <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                      {% if page_obj.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page=1">
                           <!-- Download SVG icon from http://tabler-icons.io/i/chevron-left -->
                           <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="#0054A6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
                           prev
                         </a>
                       </li>
-                      <li class="page-item"><a class="page-link" href="#">1</a></li>
-                      <li class="page-item active"><a class="page-link" href="#">2</a></li>
-                      <li class="page-item"><a class="page-link" href="#">3</a></li>
-                      <li class="page-item"><a class="page-link" href="#">4</a></li>
-                      <li class="page-item"><a class="page-link" href="#">5</a></li>
+                      {% endif %}
+
+                      {% for num in page_obj.paginator.page_range %}
+                      {% if page_obj.number == num %}
+                      <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                      <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                      {% endif %}
+                      {% endfor %}
+
+                      {% if page_obj.has_next %}
                       <li class="page-item">
-                        <a class="page-link" href="#">
-                          next <!-- Download SVG icon from http://tabler-icons.io/i/chevron-right -->
-                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="#0054A6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}"> next
+                          <!-- Download SVG icon from http://tabler-icons.io/i/chevron-right -->
+                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="#0054A6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" />
+                          </svg>
                         </a>
                       </li>
+                      {% endif %}
                     </ul>
                   </div>
                 </div>
