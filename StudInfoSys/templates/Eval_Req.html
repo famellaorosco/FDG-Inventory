@@ -9,407 +9,354 @@
 <!-- INCLUDES SIDEBAR MENU -->
 {% include 'Sidebar.html' %}
 <script src="./dist/js/demo-theme.min.js?1692870487"></script>
-<div class="page">
+<script>
+  let currentPage = 1;
+  const totalEntries = 17; // Total number of entries
+  const entriesPerPage = 10; // Number of entries per page
 
-  <div class="page-wrapper">
+  function openModal(button) {
+    const isEvaluated = button.classList.contains('bg-green-700');
+    document.getElementById('evaluationModal').classList.remove('hidden');
+    document.getElementById('currentButton').value = button.id;
 
-    <!-- INCLUDES HEADER -->
-    <div class="page-header d-print-none">
-      <div class="container-xl">
-        <div class="row g-2 align-items-center">
-          <div class="col">
-            <h2 class="page-title">
-              Evaluation Request
-            </h2>
+    if (isEvaluated) {
+      document.getElementById('overallPerformance').classList.add('pointer-events-none');
+      document.getElementById('shippingHandling').classList.add('pointer-events-none');
+      document.getElementById('defectQuestion').disabled = true;
+      document.getElementById('defectInput').querySelector('textarea').disabled = true;
+      document.getElementById('commentsSuggestions').disabled = true;
+      document.getElementById('submitButton').classList.add('hidden');
+    } else {
+      document.getElementById('overallPerformance').classList.remove('pointer-events-none');
+      document.getElementById('shippingHandling').classList.remove('pointer-events-none');
+      document.getElementById('defectQuestion').disabled = false;
+      document.getElementById('defectInput').querySelector('textarea').disabled = false;
+      document.getElementById('commentsSuggestions').disabled = false;
+      document.getElementById('submitButton').classList.remove('hidden');
+
+      // Reset the form
+      resetForm();
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('evaluationModal').classList.add('hidden');
+    document.getElementById('errorMessage').classList.add('hidden');
+  }
+
+  function toggleDefectInput() {
+    const defectInput = document.getElementById('defectInput');
+    const defectQuestion = document.getElementById('defectQuestion');
+    if (defectQuestion.value === 'yes') {
+      defectInput.classList.remove('hidden');
+    } else {
+      defectInput.classList.add('hidden');
+    }
+  }
+
+  function handleStarHover(event, ratingType) {
+    const stars = document.querySelectorAll(`.${ratingType} .fa-star`);
+    const index = Array.from(stars).indexOf(event.target);
+    stars.forEach((star, i) => {
+      if (i <= index) {
+        star.classList.add('text-yellow-500');
+        star.classList.remove('text-gray-400');
+      } else {
+        star.classList.add('text-gray-400');
+        star.classList.remove('text-yellow-500');
+      }
+    });
+  }
+
+  function handleStarClick(event, ratingType) {
+    const stars = document.querySelectorAll(`.${ratingType} .fa-star`);
+    const index = Array.from(stars).indexOf(event.target);
+    stars.forEach((star, i) => {
+      if (i <= index) {
+        star.classList.add('text-yellow-500');
+        star.classList.remove('text-gray-400');
+      } else {
+        star.classList.add('text-gray-400');
+        star.classList.remove('text-yellow-500');
+      }
+    });
+  }
+
+  function validateForm() {
+    const overallPerformanceStars = document.querySelectorAll('.overall-performance .fa-star.text-yellow-500').length;
+    const shippingHandlingStars = document.querySelectorAll('.shipping-handling .fa-star.text-yellow-500').length;
+    const defectQuestion = document.getElementById('defectQuestion').value;
+    const defectInput = document.getElementById('defectInput').querySelector('textarea').value;
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (overallPerformanceStars === 0 || shippingHandlingStars === 0 || defectQuestion === '' || (defectQuestion === 'yes' && defectInput.trim() === '')) {
+      errorMessage.textContent = 'Please fill up all required fields.';
+      errorMessage.classList.remove('hidden');
+    } else {
+      errorMessage.classList.add('hidden');
+      // Change the button to evaluated
+      const buttonId = document.getElementById('currentButton').value;
+      const button = document.getElementById(buttonId);
+      button.classList.remove('bg-blue-500');
+      button.classList.add('bg-green-700');
+      button.textContent = 'EVALUATED';
+      button.disabled = true;
+
+      // Add eye icon
+      const eyeIcon = document.createElement('i');
+      eyeIcon.classList.add('fas', 'fa-eye', 'ml-2', 'cursor-pointer');
+      eyeIcon.onclick = function() {
+        showEvaluationReport(overallPerformanceStars, shippingHandlingStars, defectQuestion, defectInput, document.getElementById('commentsSuggestions').value);
+      };
+      button.parentNode.appendChild(eyeIcon);
+
+      closeModal();
+    }
+  }
+
+  function showEvaluationReport(overallPerformanceStars, shippingHandlingStars, defectQuestion, defectInput, commentsSuggestions) {
+    document.getElementById('evaluationReportModal').classList.remove('hidden');
+    document.getElementById('reportOverallPerformance').textContent = `Overall Performance: ${overallPerformanceStars} stars`;
+    document.getElementById('reportShippingHandling').textContent = `Shipping & Handling: ${shippingHandlingStars} stars`;
+    document.getElementById('reportDefectQuestion').textContent = `Encountered Defects: ${defectQuestion}`;
+    document.getElementById('reportDefectInput').textContent = `Defect Details: ${defectInput}`;
+    document.getElementById('reportCommentsSuggestions').textContent = `Comments/Suggestions: ${commentsSuggestions}`;
+  }
+
+  function closeReportModal() {
+    document.getElementById('evaluationReportModal').classList.add('hidden');
+  }
+
+  function resetForm() {
+    const stars = document.querySelectorAll('.fa-star');
+    stars.forEach(star => {
+      star.classList.remove('text-yellow-500');
+      star.classList.add('text-gray-400');
+    });
+    document.getElementById('defectQuestion').value = '';
+    document.getElementById('defectInput').querySelector('textarea').value = '';
+    document.getElementById('defectInput').classList.add('hidden');
+    document.getElementById('commentsSuggestions').value = '';
+  }
+
+  function updateEntries() {
+    const entries = document.getElementById('entries').value;
+    const container = document.getElementById('entriesContainer');
+    container.innerHTML = '';
+
+    for (let i = 0; i < entries; i++) {
+      container.innerHTML += `
+        <div class="flex items-center justify-between p-4 border border-gray-300 rounded">
+          <div class="flex items-center">
+            <img alt="Image for entry ${i + 1}" class="w-12 h-12 mr-4" height="50" src="https://via.placeholder.com/50" width="50"/>
+            <div>
+              <div class="font-semibold">${i < 4 ? 'Publisher Name' : 'N/A'}</div>
+              <div class="text-gray-600">${i < 4 ? 'IN202400' + (i + 1) + ' - Subject - Quantity: ' + (i + 1) * 10 : 'N/A'}</div>
+            </div>
           </div>
+          <div class="flex items-center space-x-2">
+            <button id="evaluate${i + 1}" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="openModal(this)">${i < 4 ? 'Evaluate' : 'Evaluate'}</button>
+            ${i < 4 ? '' : ''}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function setActivePage(page) {
+    currentPage = page;
+    const pages = document.querySelectorAll('.pagination button');
+    pages.forEach((btn, index) => {
+      if (index + 1 === page) {
+        btn.classList.add('bg-blue-500', 'text-white');
+      } else {
+        btn.classList.remove('bg-blue-500', 'text-white');
+      }
+    });
+    updatePageEntries();
+  }
+
+  function updatePageEntries() {
+    const container = document.getElementById('entriesContainer');
+    container.innerHTML = '';
+
+    const start = (currentPage - 1) * entriesPerPage;
+    const end = start + entriesPerPage;
+
+    for (let i = start; i < end; i++) {
+      container.innerHTML += `
+        <div class="flex items-center justify-between p-4 border border-gray-300 rounded">
+          <div class="flex items-center">
+            <img alt="Image for entry ${i + 1}" class="w-12 h-12 mr-4" height="50" src="https://via.placeholder.com/50" width="50"/>
+            <div>
+              <div class="font-semibold">${i < 4 ? 'Publisher Name' : 'N/A'}</div>
+              <div class="text-gray-600">${i < 4 ? 'IN202400' + (i + 1) + ' - Subject - Quantity: ' + (i + 1) * 10 : 'N/A'}</div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="evaluate${i + 1}" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="openModal(this)">${i < 4 ? 'Evaluate' : 'Evaluate'}</button>
+            ${i < 4 ? '' : ''}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function openAddRequestModal() {
+    document.getElementById('addRequestModal').classList.remove('hidden');
+  }
+
+  function closeAddRequestModal() {
+    document.getElementById('addRequestModal').classList.add('hidden');
+  }
+
+  function addRequest() {
+    const supplierName = document.getElementById('supplierName').value;
+    const productName = document.getElementById('productName').value;
+    const quantity = document.getElementById('quantity').value;
+
+    const container = document.getElementById('entriesContainer');
+    container.innerHTML += `
+      <div class="flex items-center justify-between p-4 border border-gray-300 rounded">
+        <div class="flex items-center">
+          <img alt="Image for entry" class="w-12 h-12 mr-4" height="50" src="https://via.placeholder.com/50" width="50"/>
+          <div>
+            <div class="font-semibold">${supplierName}</div>
+            <div class="text-gray-600">IN2024005 - ${productName} - Quantity: ${quantity}</div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button id="evaluateNew" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="openModal(this)">Evaluate</button>
         </div>
       </div>
+    `;
+    closeAddRequestModal();
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    updateEntries();
+    document.getElementById('entries').addEventListener('change', updateEntries);
+    setActivePage(1);
+  });
+</script>
+<div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md" style="margin: 0.5in;">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold">Evaluation Request</h2>
+    <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="openAddRequestModal()">Add Evaluation Request</button>
+  </div>
+  <div class="mb-4">
+    <label class="mr-2" for="entries">Entries:</label>
+    <select class="border border-gray-300 rounded p-1" id="entries">
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="15">15</option>
+    </select>
+  </div>
+  <div id="entriesContainer" class="space-y-4">
+    <!-- Entries will be dynamically inserted here -->
+  </div>
+  <div class="mt-4 flex justify-center space-x-2 pagination">
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(1)">1</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(2)">2</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(3)">3</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(4)">4</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(5)">5</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(6)">6</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(7)">7</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(8)">8</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(9)">9</button>
+    <button class="px-3 py-1 border border-gray-300 rounded" onclick="setActivePage(10)">10</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="evaluationModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+    <h3 class="text-xl font-semibold mb-4">Evaluation</h3>
+    <div class="mb-4">
+      <label class="block mb-2">Overall Performance:</label>
+      <div id="overallPerformance" class="flex overall-performance">
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'overall-performance')" onclick="handleStarClick(event, 'overall-performance')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'overall-performance')" onclick="handleStarClick(event, 'overall-performance')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'overall-performance')" onclick="handleStarClick(event, 'overall-performance')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'overall-performance')" onclick="handleStarClick(event, 'overall-performance')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'overall-performance')" onclick="handleStarClick(event, 'overall-performance')"></i>
+      </div>
     </div>
+    <div class="mb-4">
+      <label class="block mb-2">Shipping & Handling:</label>
+      <div id="shippingHandling" class="flex shipping-handling">
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'shipping-handling')" onclick="handleStarClick(event, 'shipping-handling')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'shipping-handling')" onclick="handleStarClick(event, 'shipping-handling')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'shipping-handling')" onclick="handleStarClick(event, 'shipping-handling')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'shipping-handling')" onclick="handleStarClick(event, 'shipping-handling')"></i>
+        <i class="fas fa-star text-gray-400 cursor-pointer" onmouseover="handleStarHover(event, 'shipping-handling')" onclick="handleStarClick(event, 'shipping-handling')"></i>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-2">Do you encounter defects or problems with item/s?</label>
+      <select class="border border-gray-300 rounded p-1 w-full" id="defectQuestion" onchange="toggleDefectInput()">
+        <option value="">Select</option>
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+    </div>
+    <div id="defectInput" class="mb-4 hidden">
+      <label class="block mb-2">If yes, please specify:</label>
+      <textarea class="border border-gray-300 rounded p-2 w-full" rows="3"></textarea>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-2">Comments/Suggestions:</label>
+      <textarea id="commentsSuggestions" class="border border-gray-300 rounded p-2 w-full" rows="3"></textarea>
+    </div>
+    <div id="errorMessage" class="text-red-500 mb-4 hidden">Please fill up all required fields.</div>
+    <div class="flex justify-end">
+      <button class="bg-gray-500 text-white px-4 py-2 rounded mr-2" onclick="closeModal()">Cancel</button>
+      <button id="submitButton" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="validateForm()">Submit</button>
+    </div>
+    <input type="hidden" id="currentButton" value="">
+  </div>
+</div>
 
-        <!-- PAGE BODY -->
-         <div class="page-body">
-          <div class="container-xl">
-              <div class="row row-cards">
-                  <div class="space-y">
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-auto">
-                          <div class="card-body">
-                            <div class="avatar avatar-md" style="background-image: url(./static/jobs/job-4.png)"></div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="card-body ps-0">
-                            <div class="row">
-                              <div class="col">
-                                <h3 class="mb-0"><a href="#">Front-End Developer</a></h3>
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md">
-                                <div class="mt-3 list-inline list-inline-dots mb-0 text-secondary d-sm-block d-none">
-                                  <div class="list-inline-item">
-                                    Simple Focus</div>
-                                  <div class="list-inline-item">
-                                    Full-time</div>
-                                  <div class="list-inline-item">
-                                    Remote / USA</div>
-                                </div>
-                                <div class="mt-3 list mb-0 text-secondary d-block d-sm-none">
-                                  <div class="list-item">
-                                    Simple Focus</div>
-                                  <div class="list-item">
-                                    Full-time</div>
-                                  <div class="list-item">
-                                    Remote / USA</div>
-                                </div>
-                              </div>
-                              <div class="col-auto">
-                              <a href="#" class="btn" data-bs-toggle="modal" data-bs-target="#modal-report">
-                              Details 
-                              </a>
-                            </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-auto">
-                          <div class="card-body">
-                            <div class="avatar avatar-md" style="background-image: url(./static/jobs/job-5.png)"></div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="card-body ps-0">
-                            <div class="row">
-                              <div class="col">
-                                <h3 class="mb-0"><a href="#">Senior Front-End Engineer</a></h3>
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md">
-                                <div class="mt-3 list-inline list-inline-dots mb-0 text-secondary d-sm-block d-none">
-                                  <div class="list-inline-item">
-                                    Infinia ML</div>
-                                  <div class="list-inline-item">
-                                    Full-time</div>
-                                  <div class="list-inline-item">
-                                    Durham, NC</div>
-                                </div>
-                                <div class="mt-3 list mb-0 text-secondary d-block d-sm-none">
-                                  <div class="list-item">
-                                    Infinia ML</div>
-                                  <div class="list-item">
-                                    Full-time</div>
-                                  <div class="list-item">
-                                    Durham, NC</div>
-                                </div>
-                              </div>
-                              <div class="col-auto">
-                              <a href="#" class="btn">
-                              Details 
-                              </a>
-                            </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-auto">
-                          <div class="card-body">
-                            <div class="avatar avatar-md" style="background-image: url(./static/jobs/job-6.png)"></div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="card-body ps-0">
-                            <div class="row">
-                              <div class="col">
-                                <h3 class="mb-0"><a href="#">Senior Web Developer, Open Source</a></h3>
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md">
-                                <div class="mt-3 list-inline list-inline-dots mb-0 text-secondary d-sm-block d-none">
-                                  <div class="list-inline-item">
-                                    Crowd Favorite</div>
-                                  <div class="list-inline-item">
-                                    Full-time</div>
-                                  <div class="list-inline-item">
-                                    Remote / USA</div>
-                                </div>
-                                <div class="mt-3 list mb-0 text-secondary d-block d-sm-none">
-                                  <div class="list-item">
-                                    Crowd Favorite</div>
-                                  <div class="list-item">
-                                    Full-time</div>
-                                  <div class="list-item">
-                                    Remote / USA</div>
-                                </div>
-                              </div>
-                              <div class="col-auto">
-                              <a href="#" class="btn">
-                              Details 
-                              </a>
-                            </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-auto">
-                          <div class="card-body">
-                            <div class="avatar avatar-md" style="background-image: url(./static/jobs/job-7.png)"></div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="card-body ps-0">
-                            <div class="row">
-                              <div class="col">
-                                <h3 class="mb-0"><a href="#">Frontend Engineer</a></h3>
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md">
-                                <div class="mt-3 list-inline list-inline-dots mb-0 text-secondary d-sm-block d-none">
-                                  <div class="list-inline-item">
-                                    Spear AI</div>
-                                  <div class="list-inline-item">
-                                    Full-time</div>
-                                  <div class="list-inline-item">
-                                    Washington D.C.</div>
-                                </div>
-                                <div class="mt-3 list mb-0 text-secondary d-block d-sm-none">
-                                  <div class="list-item">
-                                    Spear AI</div>
-                                  <div class="list-item">
-                                    Full-time</div>
-                                  <div class="list-item">
-                                    Washington D.C.</div>
-                                </div>
-                              </div>
-                              <div class="col-auto">
-                                <a href="#" class="btn">
-                                  Details 
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-auto">
-                          <div class="card-body">
-                            <div class="avatar avatar-md" style="background-image: url(./static/jobs/job-8.png)"></div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="card-body ps-0">
-                            <div class="row">
-                              <div class="col">
-                                <h3 class="mb-0"><a href="#">Web Developer</a></h3>
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md">
-                                <div class="mt-3 list-inline list-inline-dots mb-0 text-secondary d-sm-block d-none">
-                                  <div class="list-inline-item">
-                                    Third Time Games</div>
-                                  <div class="list-inline-item">
-                                    Full-time</div>
-                                  <div class="list-inline-item">
-                                    Remote / North America</div>
-                                </div>
-                                <div class="mt-3 list mb-0 text-secondary d-block d-sm-none">
-                                  <div class="list-item">
-                                    Third Time Games</div>
-                                  <div class="list-item">
-                                    Full-time</div>
-                                  <div class="list-item">
-                                    Remote / North America</div>
-                                </div>
-                              </div>
-                              <div class="col-auto">
-                                <a href="#" class="btn">
-                                  Details 
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-auto">
-                          <div class="card-body">
-                            <div class="avatar avatar-md" style="background-image: url(./static/jobs/job-9.jpg)"></div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="card-body ps-0">
-                            <div class="row">
-                              <div class="col">
-                                <h3 class="mb-0"><a href="#">Laravel Developer</a></h3>
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md">
-                                <div class="mt-3 list-inline list-inline-dots mb-0 text-secondary d-sm-block d-none">
-                                  <div class="list-inline-item">
-                                    Mindsize</div>
-                                  <div class="list-inline-item">
-                                    Full-time</div>
-                                  <div class="list-inline-item">
-                                    Remote / USA</div>
-                                </div>
-                                <div class="mt-3 list mb-0 text-secondary d-block d-sm-none">
-                                  <div class="list-item">
-                                    Mindsize</div>
-                                  <div class="list-item">
-                                    Full-time</div>
-                                  <div class="list-item">
-                                    Remote / USA</div>
-                                </div>
-                              </div>
-                              <div class="col-auto">
-                                <a href="#" class="btn">
-                                  Details 
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-          </div>
-        </div>
-
-        <!-- MODAL FOR ORDER DETAILS -->
-        <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">New report</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="page-body">
-              <div class="container-xl">
-                <div class="card card-lg">
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col-6">
-                        <p class="h3">Company</p>
-                        <address>
-                          Street Address<br>
-                          State, City<br>
-                          Region, Postal Code<br>
-                          ltd@example.com
-                        </address>
-                      </div>
-                      <div class="col-6 text-end">
-                        <p class="h3">Client</p>
-                        <address>
-                          Street Address<br>
-                          State, City<br>
-                          Region, Postal Code<br>
-                          ctr@example.com
-                        </address>
-                      </div>
-                      <div class="col-12 my-5">
-                        <h1>Invoice INV/001/15</h1>
-                      </div>
-                    </div>
-                    <table class="table table-transparent table-responsive">
-                      <thead>
-                        <tr>
-                          <th class="text-center" style="width: 1%"></th>
-                          <th>Product</th>
-                          <th class="text-center" style="width: 1%">Qnt</th>
-                          <th class="text-end" style="width: 1%">Unit</th>
-                          <th class="text-end" style="width: 1%">Amount</th>
-                        </tr>
-                      </thead>
-                      <tr>
-                        <td class="text-center">1</td>
-                        <td>
-                          <p class="strong mb-1">Logo Creation</p>
-                          <div class="text-secondary">Logo and business cards design</div>
-                        </td>
-                        <td class="text-center">
-                          1
-                        </td>
-                        <td class="text-end">$1.800,00</td>
-                        <td class="text-end">$1.800,00</td>
-                      </tr>
-                      <tr>
-                        <td class="text-center">2</td>
-                        <td>
-                          <p class="strong mb-1">Online Store Design &amp; Development</p>
-                          <div class="text-secondary">Design/Development for all popular modern browsers</div>
-                        </td>
-                        <td class="text-center">
-                          1
-                        </td>
-                        <td class="text-end">$20.000,00</td>
-                        <td class="text-end">$20.000,00</td>
-                      </tr>
-                      <tr>
-                        <td class="text-center">3</td>
-                        <td>
-                          <p class="strong mb-1">App Design</p>
-                          <div class="text-secondary">Promotional mobile application</div>
-                        </td>
-                        <td class="text-center">
-                          1
-                        </td>
-                        <td class="text-end">$3.200,00</td>
-                        <td class="text-end">$3.200,00</td>
-                      </tr>
-                      <tr>
-                        <td colspan="4" class="strong text-end">Subtotal</td>
-                        <td class="text-end">$25.000,00</td>
-                      </tr>
-                      <tr>
-                        <td colspan="4" class="strong text-end">Vat Rate</td>
-                        <td class="text-end">20%</td>
-                      </tr>
-                      <tr>
-                        <td colspan="4" class="strong text-end">Vat Due</td>
-                        <td class="text-end">$5.000,00</td>
-                      </tr>
-                      <tr>
-                        <td colspan="4" class="font-weight-bold text-uppercase text-end">Total Due</td>
-                        <td class="font-weight-bold text-end">$30.000,00</td>
-                      </tr>
-                    </table>
-                    <p class="text-secondary text-center mt-5">Thank you very much for doing business with us. We look forward to working with
-                      you again!</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-                    <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-                      Cancel
-                    </a>
-                    <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal">
-                      Proceed to inventory
-                    </a>
-                  </div>
-              </div>
-            </div>
-          </div>
-        </div>
+<!-- Add Request Modal -->
+<div id="addRequestModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+    <h3 class="text-xl font-semibold mb-4">Add Evaluation Request</h3>
+    <div class="mb-4">
+      <label class="block mb-2">Purchase Req Number:</label>
+      <input type="text" class="border border-gray-300 rounded p-2 w-full" value="2024005" disabled>
+    </div>
+    <div class="mb-4">
+      <label class="block mb-2">Supplier Name:</label>
+      <input type="text" class="border border-gray-300 rounded p-2 w-full" value="Supplier Name">
+    </div>
+     <div class="mb-4">
+      <label class="block mb-2">Product ID:</label>
+      <input type="text" class="border border-gray-300 rounded p-2 w-full" value="Product ID">
+    </div>
+<div class="mb-4">
+      <label class="block mb-2">Quantity:</label>
+      <input type="text" class="border border-gray-300 rounded p-2 w-full" value="Quantity">
+    </div>
+    <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="openAddRequestModal()">Add</button>
+<button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="closeAddRequestModal()">Cancel</button>
+</div>
+</div>
+<!-- Evaluation Report Modal -->
+<div id="evaluationReportModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+    <h3 class="text-xl font-semibold mb-4">Evaluation Report</h3>
+    <div class="mb-4">
+      <p id="reportOverallPerformance"></p>
+      <p id="reportShippingHandling"></p>
+      <p id="reportDefectQuestion"></p>
+      <p id="reportDefectInput"></p>
+      <p id="reportCommentsSuggestions"></p>
+    </div>
+    <div class="flex justify-end">
+      <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="closeReportModal()">Close</button>
+    </div>
+  </div>
+</div>
         
 {% endblock content %}

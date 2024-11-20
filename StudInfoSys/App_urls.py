@@ -7,6 +7,7 @@ urlpatterns = [
     path('Admin_Home.html', views.admin_homepage),
     path('Depreciated_Inv.html', views.depreciated_inventory),
     path('Purchase_Req.html', views.purchase_request),
+    path('Add_Purch.html', views.add_purchase),
     path('Eval_Req.html', views.evaluation_request),
     path('Add_Supplier.html', views.add_supplier),
     path('Supplier_List.html', views.supplier_list),

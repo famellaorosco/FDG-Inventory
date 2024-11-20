@@ -171,7 +171,10 @@
                           <input type="radio" id="rejected" name="confirmation" value="Rejected" ${request.confirmation === 'Rejected' ? 'checked' : ''}>
                           <label for="rejected" class="ml-2">Rejected</label>
                       </div>
-                  </div>
+                      <div class="flex items-center">
+                            <input type="radio" id="to-be-evaluated" name="confirmation" value="To be evaluated" ${request.confirmation === 'To be evaluated' ? 'checked' : ''}>
+                            <label for="to-be-evaluated" class="ml-2">To be evaluated</label>
+                        </div>
                   <table class="min-w-full bg-white mt-4">
                       <thead>
                           <tr>
@@ -255,12 +258,14 @@
                   confirmationCell.textContent = purchaseRequests[index].confirmation;
                   confirmationCell.classList.remove('text-orange-500', 'text-green-500', 'text-red-500');
                   if (purchaseRequests[index].confirmation === 'Pending') {
-                      confirmationCell.classList.add('text-orange-500');
-                  } else if (purchaseRequests[index].confirmation === 'Accepted') {
-                      confirmationCell.classList.add('text-green-500');
-                  } else if (purchaseRequests[index].confirmation === 'Rejected') {
-                      confirmationCell.classList.add('text-red-500');
-                  }
+                        confirmationCell.classList.add('text-orange-500');
+                    } else if (purchaseRequests[index].confirmation === 'Accepted') {
+                        confirmationCell.classList.add('text-green-500');
+                    } else if (purchaseRequests[index].confirmation === 'Rejected') {
+                        confirmationCell.classList.add('text-red-500');
+                    } else if (purchaseRequests[index].confirmation === 'To be evaluated') {
+                        confirmationCell.classList.add('text-blue-500');
+                    }
 
                   closeModal();
               });
